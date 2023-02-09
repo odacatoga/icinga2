@@ -238,7 +238,52 @@ sudo systemctl reload apache2
 # Master - Client Icinga
 sudo icinga2 node wizard
 
+sudo mkdir -p /etc/icinga2/zones.d/icinga.fptgroup.com/
+sudo cat << EOF > /etc/icinga2/zones.d/icinga.fptgroup.com/icinga.fptgroup.com.conf
+// Endpoints
+object Endpoint "w22" {
+}
+// Zones
+object Zone "icinga.fptgroup.com" {
+    endpoints = [ "w22" ]
+    parent = "icinga.fptgroup.com"
+}
+// Host Objects
+object Host "w22" {
+    check_command = "hostalive"
+    address = "10.10.100.100"
+    vars.client_endpoint = name
+}
+EOF
 
+sudo cat << EOF > /etc/icinga2/zones.d/icinga.fptgroup.com/services.conf
+// Ping
+ apply Service "Ping" {
+ check_command = "ping4"
+ assign where host.address // check executed on master
+ }
+ // System Load
+ apply Service "System Load" {
+ check_command = "load"
+ command_endpoint = host.vars.client_endpoint // Check executed on client01
+ assign where host.vars.client_endpoint
+ }
+ // SSH Service
+ apply Service "SSH Service" {
+ check_command = "ssh"
+ command_endpoint = host.vars.client_endpoint
+ assign where host.vars.client_endpoint
+ }
+ // Icinga 2 Service
+ apply Service "Icinga2 Service" {
+ check_command = "icinga"
+ command_endpoint = host.vars.client_endpoint
+ assign where host.vars.client_endpoint
+ }
+EOF
+
+sudo icinga2 daemon -C
+sudo systemctl restart icinga2
 # sudo icingacli setup token create
 
 # Allow Firewall Port Forward
@@ -252,3 +297,4 @@ Fpt@@123
 Fpt@@123
 EOF
 
+cd
