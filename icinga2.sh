@@ -238,24 +238,27 @@ sudo systemctl reload apache2
 # Master - Client Icinga
 sudo icinga2 node wizard
 
+#sudo icinga2 pki ticket --cn 'ws22'
+# Create Zone for Master
 sudo mkdir -p /etc/icinga2/zones.d/icinga.fptgroup.com/
-sudo cat << EOF > /etc/icinga2/zones.d/icinga.fptgroup.com/icinga.fptgroup.com.conf
-// Endpoints
-object Endpoint "w22" {
-}
-// Zones
-object Zone "icinga.fptgroup.com" {
-    endpoints = [ "w22" ]
-    parent = "icinga.fptgroup.com"
-}
-// Host Objects
-object Host "w22" {
-    check_command = "hostalive"
-    address = "10.10.100.100"
-    vars.client_endpoint = name
-}
-EOF
+# sudo cat << EOF > /etc/icinga2/zones.d/icinga.fptgroup.com/icinga.fptgroup.com.conf
+# // Endpoints
+# object Endpoint "w22" {
+# }
+# // Zones
+# object Zone "w22" {
+#     endpoints = [ "w22" ]
+#     parent = "icinga.fptgroup.com"
+# }
+# // Host Objects
+# object Host "w22" {
+#     check_command = "hostalive"
+#     address = "10.10.100.100"
+#     vars.client_endpoint = name
+# }
+# EOF
 
+# Configure File 
 sudo cat << EOF > /etc/icinga2/zones.d/icinga.fptgroup.com/services.conf
 // Ping
  apply Service "Ping" {
@@ -292,9 +295,9 @@ sudo ufw allow proto tcp from 10.10.100.161 to any port 10050,10051
 sudo ufw allow proto tcp from 10.10.100.162 to any port 9115
 sudo ufw enable
 
+
 sudo passwd user <<EOF
 Fpt@@123
 Fpt@@123
 EOF
 
-cd
